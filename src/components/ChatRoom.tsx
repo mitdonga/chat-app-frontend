@@ -13,9 +13,12 @@ import {
 	Input,
 	Spacer,
 	Avatar,
-	Tooltip
+	Tooltip,
+	Tag,
+	TagLabel,
+	TagRightIcon
 } from '@chakra-ui/react';
-import io from 'socket.io-client';
+import { ChevronDownIcon } from '@chakra-ui/icons'
 import socketIOClient from 'socket.io-client';
 import { Socket } from 'dgram';
 
@@ -44,26 +47,30 @@ export default function ChatRoom({ username, chat, setChat }: Props) {
 	const socket = useRef<any>(null);
 
 	useEffect(() => {
+		// WS things
     socket.current = socketIOClient('http://localhost:3000');
 		socket.current.emit('join', chat.roomName);
 		socket.current.on("message", (msg: Message) => {
-			console.log("Received message", msg);
 			var messages:Message[] = chat.messages
 			messages.push(msg);
-			// console.log(chat.messages);
-			
 			var newChat:ChatRoom = {...chat, messages: messages}
 			setChat(newChat)
 			scrollToBottonMsg()
 		});
+
+		// When this component renders, scroll down to last message after X mili seconds.
+		setTimeout(() => {		
+			scrollToBottonMsg(true)
+		}, 100)
+
     return () => {
+			// Disconnecting socket connection.
       if (socket.current) socket.current.disconnect();
     };
   }, []);
 
 	const [isOpen, setIsOpen] = useState(true);
 	const [message, setMessage] = useState('');
-	const bottomRef = useRef<any>(null);
 	
 	function handleClose(){
 		setIsOpen(false);
@@ -87,78 +94,113 @@ export default function ChatRoom({ username, chat, setChat }: Props) {
 		scrollToBottonMsg()
 	}, [chat]);
 
-	const messageBody = document.getElementById('message_box');
-	const chatEndDiv = document.getElementById('chat_end');
+	const messageDiv = useRef<HTMLDivElement|null>(null);
+	const chatEndDiv = useRef<HTMLDivElement|null>(null);
+
+	const messageInput = useRef<HTMLInputElement|null>(null);
+	const submitButton = useRef<HTMLButtonElement|null>(null);
+
+	const [showUnreadMessage, setShowUnreadMessage] = useState<boolean>(false);
+
 	function scrollToBottonMsg(forceScroll=false){
-		if (messageBody){
-			if (elementIsVisibleInViewport(chatEndDiv) || forceScroll){
-				messageBody.scrollTo({
-					top: messageBody.scrollHeight,
-					behavior: 'smooth'
-				})
-			}
+		if (!messageDiv.current) return;
+		if (elementIsVisibleInViewport(chatEndDiv.current) || forceScroll){
+			messageDiv.current.scrollTo({
+				top: messageDiv.current.scrollHeight,
+				behavior: 'smooth'
+			})
+			setShowUnreadMessage(false);
+		} else {
+			setShowUnreadMessage(true)
 		}
 	}
 
-	const messageInput = document.getElementById("chat_message");
-	const submitButton = document.getElementById("submit_btn");
-
-	if (messageInput && submitButton){
-		messageInput.addEventListener("keydown", function(event) {
+	// Send message by clicking ENTER
+	if (messageInput.current && submitButton.current){
+		messageInput.current.addEventListener("keydown", function(event) {
 			if (event.key === "Enter") {
-				submitButton.click();
+				submitButton.current?.click();
 				scrollToBottonMsg(true);
 			}
 		});
 	}
 
+	// Listening to scroll event for "message_box div" 
+	// if scroll is at bottom then set show unread message to FALSE
+	function handleMessagesScroll(e:any) {
+		if (e?.target){
+			if (e.target.offsetHeight + e.target.scrollTop === e.target.scrollHeight) setShowUnreadMessage(false);
+		}
+	}
+
 	return (
-		<Modal closeOnOverlayClick={false} isOpen={isOpen} onClose={handleClose} size="4xl">
+		<Modal closeOnOverlayClick={false} isOpen={isOpen} onClose={handleClose} size="4xl" >
 			<ModalOverlay />
-			<ModalContent>
+			<ModalContent position='relative'>
 				<ModalHeader>{chat.roomName}</ModalHeader>
 				<ModalCloseButton />
 				<ModalBody pb={6} >
-					<Box height='70vh' overflowY='scroll' id="message_box" className="scroll">
-					{
-						chat.messages.map(function (msg, index){
-							return (
-								<div key={index}>
-									{
-										msg.messenger.username === username ? 
-										<Flex mt={1} justify='end' mr={3}>
-											<Box mr='3' alignItems='baseline'>
-												<Text fontSize='xl' mt={3}>{msg.content}</Text>
-											</Box>
-											<Tooltip label={msg.messenger.username} placement='right-end' hasArrow>
-												<Avatar name={msg.messenger.username} bg={getColorCode(msg.messenger.username)}/>
-											</Tooltip>
-										</Flex> :
-										<Flex mt={1}>
-											<Tooltip label={msg.messenger.username} placement='left-start' hasArrow>
-												<Avatar name={msg.messenger.username} bg={getColorCode(msg.messenger.username)}/>
-											</Tooltip>
-											<Box ml='3' alignItems='baseline'>
-												<Text fontSize='xl' mt={3}>{msg.content}</Text>
-											</Box>
-										</Flex>
-									}
-								</div>
-							)
-						})
-					}
-					<div id="chat_end"/>
+					<Box 
+						ref={messageDiv} 
+						height='70vh' 
+						overflowY='scroll' 
+						id="message_box" 
+						className="scroll"
+						onScroll={handleMessagesScroll}
+					>
+						{
+							chat.messages.map(function (msg, index){
+								return (
+									<div key={index}>
+										{
+											msg.messenger.username === username ? 
+											<Flex mt={1} justify='end' mr={3}>
+												<Box mr='3' alignItems='baseline'>
+													<Text fontSize='xl' mt={3}>{msg.content}</Text>
+												</Box>
+												<Tooltip label={msg.messenger.username} placement='right-end' hasArrow>
+													<Avatar name={msg.messenger.username} bg={getColorCode(msg.messenger.username)}/>
+												</Tooltip>
+											</Flex> :
+											<Flex mt={1}>
+												<Tooltip label={msg.messenger.username} placement='left-start' hasArrow>
+													<Avatar name={msg.messenger.username} bg={getColorCode(msg.messenger.username)}/>
+												</Tooltip>
+												<Box ml='3' alignItems='baseline'>
+													<Text fontSize='xl' mt={3}>{msg.content}</Text>
+												</Box>
+											</Flex>
+										}
+									</div>
+								)
+							})
+						}
+					{showUnreadMessage &&
+						<div style={{position: 'absolute', bottom: '80px', left: 0, display: 'flex', justifyContent: 'center', width: '100%'}}>
+							<Tag
+								size='lg'
+								borderRadius='full'
+								variant='outline'
+								colorScheme='blue'
+								onClick={() => scrollToBottonMsg(true)}
+								cursor='pointer'
+							>
+								<TagLabel>New Messages</TagLabel>
+								<TagRightIcon as={ChevronDownIcon} />
+							</Tag>
+						</div>}
+					<div ref={chatEndDiv} id="chat_end"/>
 					</Box>
 				</ModalBody>
 				
 				<Box mx={5} my={5} >
 					<Flex minWidth='max-content' alignItems='center' gap='2'>
 						<Box width="100%">
-							<Input variant='outline' id="chat_message" placeholder='Enter message' width='100%' value={message} onChange={(e) => setMessage(e.target.value)} autoFocus/>
+							<Input ref={messageInput} variant='outline' id="chat_message" placeholder='Enter message' width='100%' value={message} onChange={(e) => setMessage(e.target.value)} autoFocus/>
 						</Box>
 						<Spacer />
 						<Box >
-							<Button variant='solid' id="submit_btn" colorScheme='blue' onClick={handleSendMessage}>Send</Button>
+							<Button ref={submitButton} variant='solid' id="submit_btn" colorScheme='blue' onClick={handleSendMessage}>Send</Button>
 						</Box>
 					</Flex>
 				</Box>
