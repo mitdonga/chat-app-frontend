@@ -46,10 +46,15 @@ interface ChatRoom {
 export default function ChatRoom({ username, chat, setChat }: Props) {
 	const socket = useRef<any>(null);
 
+	const [isOpen, setIsOpen] = useState(true);
+	const [message, setMessage] = useState('');
+	const [isTyping, setIsTyping] = useState(false);
+	const [typingUsers, setTypingUsers] = useState<String[]>([]);
+
 	useEffect(() => {
 		// WS things
     socket.current = socketIOClient('http://localhost:3000');
-		socket.current.emit('join', chat.roomName);
+		socket.current.emit('join', {roomName: chat.roomName, user: username});
 		socket.current.on("message", (msg: Message) => {
 			var messages:Message[] = chat.messages
 			messages.push(msg);
@@ -57,9 +62,18 @@ export default function ChatRoom({ username, chat, setChat }: Props) {
 			setChat(newChat)
 			scrollToBottonMsg()
 		});
+		socket.current.on('typing', (data:any) => {
+			console.log(data);
+			if (data?.typingUsers?.length > 0){
+				const typingUsers = data?.typingUsers.filter((u:String) => u && u != username)
+				setTypingUsers(typingUsers)
+			} else {
+				setTypingUsers([])
+			}
+		});
 
 		// When this component renders, scroll down to last message after X mili seconds.
-		setTimeout(() => {		
+		setTimeout(() => {
 			scrollToBottonMsg(true)
 		}, 100)
 
@@ -68,9 +82,6 @@ export default function ChatRoom({ username, chat, setChat }: Props) {
       if (socket.current) socket.current.disconnect();
     };
   }, []);
-
-	const [isOpen, setIsOpen] = useState(true);
-	const [message, setMessage] = useState('');
 	
 	function handleClose(){
 		setIsOpen(false);
@@ -133,6 +144,32 @@ export default function ChatRoom({ username, chat, setChat }: Props) {
 		}
 	}
 
+	// Detect typing, stopped typing and updating socket
+	let timer:any;
+
+	if (messageInput.current){
+		messageInput.current.addEventListener('keydown', function(event) {
+			if (!isTyping) setIsTyping(true);
+		})
+
+		messageInput.current.addEventListener('keyup', function(event) {
+			if (timer) clearTimeout(timer);
+			timer = setTimeout(() => {
+				setIsTyping(false);
+			}, 2000)
+		})
+	}
+
+	useEffect(() => {
+		if (isTyping) {
+			socket.current.emit('startTyping', {roomName: chat.roomName})
+			console.log("User is typing...")
+		} else { 
+			socket.current.emit('stopTyping', {roomName: chat.roomName})
+			console.log("User stopped typing...")
+		}
+	}, [isTyping])
+
 	return (
 		<Modal closeOnOverlayClick={false} isOpen={isOpen} onClose={handleClose} size="4xl" >
 			<ModalOverlay />
@@ -193,7 +230,12 @@ export default function ChatRoom({ username, chat, setChat }: Props) {
 					</Box>
 				</ModalBody>
 				
-				<Box mx={5} my={5} >
+				<Box mx={5} mb={5} >
+					{	typingUsers.length === 1 ? 
+						`${typingUsers[0]} is typing...` : 
+						typingUsers.length > 1 ? 
+						`${typingUsers.join(", ")} are typing...` : null
+					}
 					<Flex minWidth='max-content' alignItems='center' gap='2'>
 						<Box width="100%">
 							<Input ref={messageInput} variant='outline' id="chat_message" placeholder='Enter message' width='100%' value={message} onChange={(e) => setMessage(e.target.value)} autoFocus/>
