@@ -26,6 +26,8 @@ import { Logo } from "./Logo"
 import Navbar from "./components/Navbar"
 import Dashboard from "./components/Dashboard"
 import ChatRoom from "./components/ChatRoom";
+import Login from "./components/Login";
+import Signup from "./components/Signup";
 
 export const App = () => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
@@ -55,7 +57,7 @@ export const App = () => {
 
 	return (
 		<ChakraProvider theme={theme}>
-			<Modal isOpen={isOpen} onClose={onClose}>
+			{/* <Modal isOpen={isOpen} onClose={onClose}>
 				<ModalOverlay />
 				<ModalContent>
 					<ModalHeader>Please Set Your User Name</ModalHeader>
@@ -69,22 +71,24 @@ export const App = () => {
 						</Button>
 					</ModalFooter>
 				</ModalContent>
-			</Modal>
+			</Modal> */}
 
 			<Box textAlign="center" fontSize="xl">
 				<Navbar username={username} />
 				{ username && <Dashboard username={username} /> }
 
-				{/* <BrowserRouter>
+				<BrowserRouter>
 					<Routes>
-						<Route path="/" element={username ? <Dashboard username={username} /> : null}>
-							<Route 
-								path="/chat-room/:id"
-								element={<ChatRoom />} 
+						<Route path="/" element={<Login/>}>
+							<Route
+								path="/chat-rooms"
+								element={username ? <Dashboard username={username}/> : <Login/>} 
 							/>
 						</Route>
+						<Route path="/login" element={<Login />} />
+						<Route path="/signup" element={<Signup />} />
 					</Routes>
-				</BrowserRouter> */}
+				</BrowserRouter>
 
 			</Box>
 		</ChakraProvider>
