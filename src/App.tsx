@@ -2,32 +2,21 @@ import React, { useEffect, useState } from "react"
 import {
   ChakraProvider,
   Box,
-  Text,
-  Link,
-  VStack,
-  Code,
-  Grid,
   theme,
-	Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
-	Button,
-	Input,
 	useDisclosure,
 	useToast
 } from "@chakra-ui/react"
 import { ColorModeSwitcher } from "./ColorModeSwitcher"
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import 'react-toastify/dist/ReactToastify.css';
 import { Logo } from "./Logo"
 import Navbar from "./components/Navbar"
 import Dashboard from "./components/Dashboard"
 import ChatRoom from "./components/ChatRoom";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export const App = () => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
@@ -72,7 +61,7 @@ export const App = () => {
 					</ModalFooter>
 				</ModalContent>
 			</Modal> */}
-
+			<ToastContainer />
 			<Box textAlign="center" fontSize="xl">
 				<Navbar username={username} />
 				{ username && <Dashboard username={username} /> }

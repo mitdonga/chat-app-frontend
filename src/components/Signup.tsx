@@ -13,8 +13,9 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons'
 import { useNavigate } from 'react-router-dom';
 import _ from 'lodash/fp';
-import { log } from 'console';
-import { SyntheticEventData } from 'react-dom/test-utils';
+import axios from "axios";
+import { app } from '../config/appConfig'
+import { toast } from 'react-toastify';
 
 interface Inputs {
 	email: string,
@@ -54,10 +55,27 @@ export default function Signup() {
     reValidateMode: 'onBlur',
   });
 
-  const onSubmit: SubmitHandler<Inputs> = (data) => {
+  const onSubmit: SubmitHandler<Inputs> = async (data) => {
 		if (data.password === data.confirm_password) {
-			console.log(data);
-			
+			try {
+				const res = await axios.post(`${app.BACKEND_URL}/signup`, {
+					name: data.name,
+					email: data.email.toLowerCase(),
+					password: data.password,
+					confirm_password: data.confirm_password
+				})
+				if (res.status === 200){
+					toast.success('Signup successful', { theme: "colored" });
+					handleLogin()
+				} else {
+					toast.error(res.data.message, { theme: "colored" });
+				}
+			} catch (err:any) {
+				if (err.response?.data?.message)
+					toast.error(err.response.data.message, { theme: "colored" });
+				else
+					toast.error(err.message, { theme: "colored" });
+			}
 		} else {
 			setPasswordMatchError(true)
 		}

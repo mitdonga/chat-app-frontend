@@ -13,6 +13,9 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons'
 import { useNavigate } from 'react-router-dom';
 import _ from 'lodash/fp';
+import axios from "axios";
+import { app } from '../config/appConfig';
+import { toast } from 'react-toastify';
 
 interface Inputs {
 	email: string,
@@ -22,9 +25,25 @@ interface Inputs {
 export default function Login() {
 	const [showPassword, setShowPassword] = useState(false);
 	const navigate = useNavigate()
-  const { register, handleSubmit, watch, formState: { errors } } = useForm<Inputs>();
-  const onSubmit: SubmitHandler<Inputs> = (data) => {
-		console.log(data)
+  const { register, handleSubmit, watch, formState: { errors } } = useForm<Inputs>({
+		mode: 'onBlur',
+		reValidateMode: 'onBlur'
+	});
+  const onSubmit: SubmitHandler<Inputs> = async (data) => {
+		// console.log(data)
+		try {
+			const res = await axios.post(`${app.BACKEND_URL}/login`, {
+				email: data.email.toLowerCase(),
+				password: data.password
+			})
+			if (res.status === 200) {
+				toast.success("Login successful", { theme: "colored" });
+			} else {
+				toast.error(res.data.message, { theme: "colored" });
+			}
+		} catch (error:any){
+			toast.error(error.response.data.message, { theme: "colored" });
+		}
 	};
 
 	function handleSignUp(){
@@ -43,7 +62,7 @@ export default function Login() {
 							<Input
 								pr='4.5rem'
 								placeholder='Enter email'
-								{...register("email", {required: true, minLength: 5, pattern: /^\w+([+.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,})+$/,})}
+								{...register("email", {required: true, pattern: /^\w+([+.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,})+$/,})}
 							/>
 						</InputGroup> 
 						{_.get("email.type", errors) === "required" && 
