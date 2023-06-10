@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, useContext } from 'react';
 import {
   Box,
   Flex,
@@ -17,6 +17,7 @@ import {
   Center,
 } from '@chakra-ui/react';
 import { MoonIcon, SunIcon } from '@chakra-ui/icons';
+import AuthContext from '../AuthContext';
 
 const NavLink = ({ children }: { children: ReactNode }) => (
   <Link
@@ -36,16 +37,18 @@ interface Props {
 	username: String | null
 }
 
-export default function Nav({ username }: Props) {
+export default function Nav() {
 
   const { colorMode, toggleColorMode } = useColorMode();
   const { isOpen, onOpen, onClose } = useDisclosure();
+
+	const context = useContext(AuthContext);
 	
   return (
     <>
       <Box bg={useColorModeValue('gray.100', 'gray.900')} px={4}>
         <Flex h={16} alignItems={'center'} justifyContent={'space-between'}>
-          <Box>{username}</Box>
+          <Box>{context?.authUser?.name}</Box>
 
           <Flex alignItems={'center'}>
             <Stack direction={'row'} spacing={7}>
@@ -75,7 +78,7 @@ export default function Nav({ username }: Props) {
                   </Center>
                   <br />
                   <Center>
-                    <p>{username}</p>
+                    <p>{context?.authUser?.name}</p>
                   </Center>
                   <br />
                   <MenuDivider />

@@ -14,8 +14,9 @@ import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons'
 import { useNavigate } from 'react-router-dom';
 import _ from 'lodash/fp';
 import axios from "axios";
-import { app } from '../config/appConfig'
+import app from '../config/appConfig'
 import { toast } from 'react-toastify';
+import Axios from '../config/Axios';
 
 interface Inputs {
 	email: string,
@@ -58,11 +59,15 @@ export default function Signup() {
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
 		if (data.password === data.confirm_password) {
 			try {
-				const res = await axios.post(`${app.BACKEND_URL}/signup`, {
-					name: data.name,
-					email: data.email.toLowerCase(),
-					password: data.password,
-					confirm_password: data.confirm_password
+				const res = await Axios({
+					url: '/signup',
+					method: 'POST',
+					data: {
+						name: data.name,
+					  email: data.email.toLowerCase(),
+						password: data.password,
+						confirm_password: data.confirm_password
+					}
 				})
 				if (res.status === 200){
 					toast.success('Signup successful', { theme: "colored" });

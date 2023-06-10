@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import {
 	Input,
 	InputGroup,
@@ -14,8 +14,10 @@ import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons'
 import { useNavigate } from 'react-router-dom';
 import _ from 'lodash/fp';
 import axios from "axios";
-import { app } from '../config/appConfig';
+import app from '../config/appConfig';
 import { toast } from 'react-toastify';
+import AuthContext from '../AuthContext';
+import Axios from '../config/Axios';
 
 interface Inputs {
 	email: string,
@@ -23,6 +25,7 @@ interface Inputs {
 }
 
 export default function Login() {
+	const userContext = useContext(AuthContext)
 	const [showPassword, setShowPassword] = useState(false);
 	const navigate = useNavigate()
   const { register, handleSubmit, watch, formState: { errors } } = useForm<Inputs>({
@@ -32,11 +35,19 @@ export default function Login() {
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
 		// console.log(data)
 		try {
-			const res = await axios.post(`${app.BACKEND_URL}/login`, {
-				email: data.email.toLowerCase(),
-				password: data.password
+			const res = await Axios({
+				url: `/login`,
+				method: 'post',
+				data: {
+					email: data.email.toLowerCase(),
+					password: data.password
+				},
 			})
+
 			if (res.status === 200) {
+				localStorage.setItem('user', JSON.stringify(res.data.user))
+				userContext?.setAuthUser(res.data.user);
+				navigate('/chat-rooms')
 				toast.success("Login successful", { theme: "colored" });
 			} else {
 				toast.error(res.data.message, { theme: "colored" });

@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import axios from "axios";
-import { app } from '../config/appConfig'
+import app from '../config/appConfig'
 import {
   Text,
   Flex,
@@ -15,6 +15,9 @@ import {
 	Image,
 } from '@chakra-ui/react';
 import ChatRoom from './ChatRoom';
+import AuthContext from '../AuthContext';
+import { toast } from 'react-toastify';
+import Axios from '../config/Axios';
 
 interface Props {
 	username: string
@@ -34,15 +37,25 @@ interface ChatRoom {
 	messages: Message[]
 }
 
-export default function Dashboard({ username }: Props) {
+export default function Dashboard() {
+	const context = useContext(AuthContext);
 	const [chatRooms, setChatRooms] = useState([]);
 	const [chat, setChat] = useState<null | ChatRoom>(null);
 
-	function fetchChatRooms () {
-		axios.get(`${app.BACKEND_URL}/chat-rooms`).then((response) => {
-			console.log(response.data);
-			setChatRooms(response.data);
-		});
+	async function fetchChatRooms () {
+		try {
+			const response = await Axios({
+				url: `/chat-rooms`,
+				method: 'GET'
+			})
+			if (response.status === 200) {
+				setChatRooms(response.data);
+			} else {
+				toast.error(response.data.message, { theme: "colored" })
+			}
+		} catch (error) {
+			console.log(error)
+		}
 	}
 
 	function showChats(chatRoom: ChatRoom) {
@@ -50,8 +63,11 @@ export default function Dashboard({ username }: Props) {
 	}
 
 	useEffect(() => {
-		if (username) {
-			fetchChatRooms();
+		if (context?.authUser) {
+			console.log("Inside Dashboard.. ");
+			
+			// setTimeout(() => fetchChatRooms(), 2000)
+			fetchChatRooms()
 		}
 	}, []);
 
@@ -83,7 +99,7 @@ export default function Dashboard({ username }: Props) {
 					}
 				</Flex>
 			</Container>
-			{ chat && <ChatRoom username={username} chat={chat} setChat={setChat} />}
+			{/* { chat && <ChatRoom username={context?.authUser?.name} chat={chat} setChat={setChat} />} */}
 		</Box>
 	)
 }
