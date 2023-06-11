@@ -68,24 +68,26 @@ export default function Nav() {
                     src={'https://avatars.dicebear.com/api/male/username.svg'}
                   />
                 </MenuButton>
-                <MenuList alignItems={'center'}>
-                  <br />
-                  <Center>
-                    <Avatar
-                      size={'2xl'}
-                      src={'https://avatars.dicebear.com/api/male/username.svg'}
-                    />
-                  </Center>
-                  <br />
-                  <Center>
-                    <p>{context?.authUser?.name}</p>
-                  </Center>
-                  <br />
-                  <MenuDivider />
-                  {/* <MenuItem>Your Servers</MenuItem>
-                  <MenuItem>Account Settings</MenuItem>
-                  <MenuItem>Logout</MenuItem> */}
-                </MenuList>
+                {context?.authUser && 
+									<MenuList alignItems={'center'}>
+										<br />
+										<Center>
+											<Avatar
+												size={'2xl'}
+												src={'https://avatars.dicebear.com/api/male/username.svg'}
+											/>
+										</Center>
+										<br />
+										<Center>
+											<p>{context.authUser?.name}</p>
+										</Center>
+										<Center>
+											<p>{context.authUser?.email}</p>
+										</Center>
+										<br />
+										<MenuDivider />
+                	</MenuList>
+								}
               </Menu>
             </Stack>
           </Flex>

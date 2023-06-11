@@ -20,8 +20,9 @@ import 'react-toastify/dist/ReactToastify.css';
 import AuthContext from "./AuthContext"
 
 interface User {
-	name: string|null,
-	email: string|null
+	_id: string,
+	name: string,
+	email: string
 }
 
 export const App = () => {
@@ -32,10 +33,6 @@ export const App = () => {
 	function setAuthUser(user:User){
 		setAuthenticatedUser(user);
 	}
-
-	useEffect(() => {
-		console.log("Inside APP..");
-	}, [])
 	
 	return (
 		<ChakraProvider theme={theme}>
@@ -49,6 +46,10 @@ export const App = () => {
 							<Route
 								path="/chat-rooms"
 								element={authUser ? <Dashboard /> : <Login/>} 
+							/>
+							<Route
+								path="/chat-rooms/:name"
+								element={authUser ? <ChatRoom /> : <Login/>} 
 							/>
 							<Route path="/login" element={<Login />} />
 							<Route path="/signup" element={<Signup />} />

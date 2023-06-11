@@ -1,8 +1,9 @@
 import React from 'react'
 
 interface User {
-	name: string|null,
-	email: string|null
+	_id: string,
+	name: string,
+	email: string
 }
 
 interface UserContextProps {

@@ -52,3 +52,37 @@
 	z-index: -1;
 }
 
+.self_messages {
+	max-width: 90% !important;
+	float:  right;
+  clear: right;
+}
+
+.self_messages::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+.others_messages::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+.others_messages {
+	max-width: 90%;
+	float:  left;
+  clear: left;
+}
+
+.chat-container {
+	overflow: hidden;
+	position: relative;
+	/* width: 320px; */
+	max-width: 100%;
+}
+
+.message_div {
+	overflow: hidden;
+}
