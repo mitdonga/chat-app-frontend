@@ -18,6 +18,7 @@ import {
 } from '@chakra-ui/react';
 import { MoonIcon, SunIcon } from '@chakra-ui/icons';
 import AuthContext from '../AuthContext';
+import Profile from "../media/profile.webp"
 
 const NavLink = ({ children }: { children: ReactNode }) => (
   <Link
@@ -65,7 +66,7 @@ export default function Nav() {
                   minW={0}>
                   <Avatar
                     size={'sm'}
-                    src={'https://avatars.dicebear.com/api/male/username.svg'}
+                    src={Profile}
                   />
                 </MenuButton>
                 {context?.authUser && 
@@ -74,7 +75,7 @@ export default function Nav() {
 										<Center>
 											<Avatar
 												size={'2xl'}
-												src={'https://avatars.dicebear.com/api/male/username.svg'}
+												src={Profile}
 											/>
 										</Center>
 										<br />
