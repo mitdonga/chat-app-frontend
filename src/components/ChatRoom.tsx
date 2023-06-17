@@ -112,7 +112,6 @@ export default function ChatRoom() {
 	}
 
 	useEffect(() => {
-		console.log("Inside Room useEffect..");
 		
 		scrollToBottonMsg()
 
@@ -209,18 +208,16 @@ export default function ChatRoom() {
 
 	return (
 		<>
-			<h2>{room?.name}</h2>
 			<Modal closeOnOverlayClick={false} isOpen={isOpen} onClose={handleClose} size="4xl" >
-			<h2>{room?.name}</h2>
 				<ModalOverlay />
-				<ModalContent position='relative'>
+				<ModalContent>
 					<ModalHeader>{room?.name}</ModalHeader>
 					<ModalCloseButton />
-					<ModalBody pb={6} >
+					<ModalBody pb={6} position="relative">
 						<Box 
 							ref={messageDiv} 
 							height='70vh' 
-							overflowY='scroll' 
+							overflowY='scroll'
 							id="message_box" 
 							className="scroll chat-container"
 							onScroll={handleMessagesScroll}
@@ -232,9 +229,9 @@ export default function ChatRoom() {
 										<Box key={index} className='message_div' mt={2}>
 											{
 												msg.sender.email === user?.email ? 
-												<Box bg={colorMode === 'dark' ? "#1A120B" : "#C3E2F6"} py={3} borderRadius="lg" className='self_messages' mr={2}>
+												<Box mr={2}>
 													<Flex mt={1} justify='end' pr={3} pl={5} >
-														<Box mr='3' alignItems='baseline'>
+														<Box mr='3' alignItems='baseline' bg={colorMode === 'dark' ? "#1A120B" : "#C3E2F6"} p={3} borderRadius="lg" className='self_messages' >
 															<Text fontSize='xl' >{msg.content}</Text>
 															<small>{formatTime(msg.timestamp)}</small>
 														</Box>
@@ -243,12 +240,12 @@ export default function ChatRoom() {
 														</Tooltip>
 													</Flex>
 												</Box> :
-												<Box bg={colorMode === 'dark' ? "#545B77" : "#E6FFFA"} py={3} borderRadius="lg" className='others_messages'>
+												<Box >
 													<Flex mt={1} pl={3} pr={5}>
 														<Tooltip label={msg.sender.name} placement='left-start' hasArrow>
 															<Avatar name={msg.sender.name} bg={getColorCode(msg.sender.name)}/>
 														</Tooltip>
-														<Box pl='3' alignItems='baseline'>
+														<Box ml='3' alignItems='baseline' bg={colorMode === 'dark' ? "#545B77" : "#E6FFFA"} p={3} borderRadius="lg" className='others_messages'>
 															<Text fontSize='xl'>{msg.content}</Text>
 															<small>{formatTime(msg.timestamp)}</small>
 														</Box>
@@ -260,7 +257,7 @@ export default function ChatRoom() {
 								})
 							}
 						{showUnreadMessage &&
-							<div style={{position: 'absolute', bottom: '80px', left: 0, display: 'flex', justifyContent: 'center', width: '100%'}}>
+							<div style={{position: 'absolute', bottom: '50px', left: 0, display: 'flex', justifyContent: 'center', width: '100%'}}>
 								<Tag
 									size='lg'
 									borderRadius='full'
