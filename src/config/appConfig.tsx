@@ -3,7 +3,7 @@ const dev = {
 }
 
 const production = {
-	BACKEND_URL: 'https://chat-app-mitpatel5344-gmailcom.vercel.app'
+	BACKEND_URL: 'https://chat-app-backend-wr4n.onrender.com'
 }
 
 export default process.env.NODE_ENV === 'production' ? production : dev;
