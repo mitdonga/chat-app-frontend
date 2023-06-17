@@ -30,8 +30,7 @@ Axios.interceptors.response.use(
     // Handle response error
     if (error.response && error.response.status === 401) {
 			localStorage.clear();
-			localStorage.setItem('error', JSON.stringify(error.response))
-      // window.location.replace("/");
+      window.location.replace("/");
 			
       // You can also perform additional actions here, such as showing a notification
 
