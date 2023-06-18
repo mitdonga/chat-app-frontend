@@ -79,13 +79,13 @@ export default function ChatRoom() {
 				setMessages(res.data.messages)
 				socket.current.emit('join', {roomId: res.data.chatRoom._id, userId: user?._id});
 			}
+
+			// When this component renders, scroll down to last message after X mili seconds.
+			setTimeout(() => {
+				scrollToBottonMsg(true)
+			}, 300)
 		}
 		fetchMessages()
-
-		// When this component renders, scroll down to last message after X mili seconds.
-		setTimeout(() => {
-			scrollToBottonMsg(true)
-		}, 300)
 
     return () => {
 			// Disconnecting socket connection.
@@ -231,7 +231,7 @@ export default function ChatRoom() {
 												msg.sender.email === user?.email ? 
 												<Box mr={2}>
 													<Flex mt={1} justify='end' pr={3} pl={5} >
-														<Box mr='3' alignItems='baseline' bg={colorMode === 'dark' ? "#1A120B" : "#C3E2F6"} p={3} borderRadius="lg" className='self_messages' >
+														<Box mr='3' alignItems='baseline' bg={colorMode === 'dark' ? "#1A120B" : "#C3E2F6"} p={3} borderBottomRadius="xl" borderTopLeftRadius="xl" className='self_messages' >
 															<Text fontSize='xl' >{msg.content}</Text>
 															<small>{formatTime(msg.timestamp)}</small>
 														</Box>
@@ -245,7 +245,7 @@ export default function ChatRoom() {
 														<Tooltip label={msg.sender.name} placement='left-start' hasArrow>
 															<Avatar name={msg.sender.name} bg={getColorCode(msg.sender.name)}/>
 														</Tooltip>
-														<Box ml='3' alignItems='baseline' bg={colorMode === 'dark' ? "#545B77" : "#E6FFFA"} p={3} borderRadius="lg" className='others_messages'>
+														<Box ml='3' alignItems='baseline' bg={colorMode === 'dark' ? "#545B77" : "#E6FFFA"} p={3} borderBottomRadius="xl" borderTopRightRadius="xl" className='others_messages'>
 															<Text fontSize='xl'>{msg.content}</Text>
 															<small>{formatTime(msg.timestamp)}</small>
 														</Box>
